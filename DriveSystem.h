@@ -22,39 +22,38 @@
 class DriveSystem
 {
 public:
-  DriveSystem();
+	DriveSystem();
 
-  void drive(int targetSpeed);
-  void brake();
-  void turn(int targetSpeed, float targetTheta);
-  
-  float getTheta()    { return currentTheta;    }
-  Point getPosition() { return currentPosition; }
-  void update();
-  
-  Servo motor_left;
-  Servo motor_right;
-  I2CEncoder encoder_left;
-  I2CEncoder encoder_right;
+	void drive(int targetSpeed);
+	void brake();
+	void turn(int targetSpeed, float targetTheta);
+
+	float getTheta()    { return currentTheta;    }
+	Point getPosition() { return currentPosition; }
+	void update();
+
+	Servo motor_left;
+	Servo motor_right;
+	I2CEncoder encoder_left;
+	I2CEncoder encoder_right;
 
 private:
-  void updatePositionAndTheta();
-  float constrainTheta(float theta);
-  
-  PID pid_drive;
-  PID pid_turn_angle;
-  
-  float encoder_left_last;    //last reading from encoder 1
-  float encoder_right_last;   //last reading from encoder 2
-  
-  Point currentPosition;      //current position from origin
-  float currentTheta;
-  
-  int targetSpeed;            //target speed as a percent of max speed
-  float targetTheta;
-  
-  byte state;
-  long lastTime;
+	void updatePositionAndTheta();
+	float constrainTheta(float theta);
+
+	PID pid_drive;
+	PID pid_turn_angle;
+
+	float encoder_left_last;    //last reading from encoder 1
+	float encoder_right_last;   //last reading from encoder 2
+
+	Point currentPosition;      //current position from origin
+	float currentTheta;
+
+	int targetSpeed;            //target speed as a percent of max speed
+	float targetTheta;
+
+	byte state;
 };
 
 #endif
