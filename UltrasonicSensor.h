@@ -14,7 +14,7 @@ public:
 		pinMode(pingPin, OUTPUT);
 		pinMode(dataPin, INPUT);
 
-                lastValue = 100;
+		lastValue = 100;
 	}
 
 	float read()
@@ -23,13 +23,13 @@ public:
 		delayMicroseconds(10);
 		digitalWrite(pingPin, LOW);
 		lastValue = 0.7*(0.0174 * pulseIn(dataPin, HIGH, 10000) - 1.56) + 0.3*lastValue;
-                return lastValue;
+		return lastValue;
 	}
 
 private:
 	int pingPin;
 	int dataPin;
-        float lastValue;
+	float lastValue;
 };
 
 #endif
