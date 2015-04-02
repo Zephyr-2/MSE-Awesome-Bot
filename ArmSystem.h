@@ -1,45 +1,51 @@
 #ifndef ARMSYSTEM_H
 #define ARMSYSTEM_H
 
-#define MOTOR_BRAKE  1500
-
 #include "Arduino.h"
 #include "PID.h"
 #include <Servo.h>
 #include <I2CEncoder.h>
 #include <Wire.h>
-#include <usTimer2.h>
+
+#define MOTOR_BRAKE			1500
+#define ELEVATOR_THRESHOLD	0.1
+#define ARM_THRESHOLD		0.1
+#define CLAW_THRESHOLD		0.1
+
+#define ARM_MAX
+#define CLAW_MAX
 
 class ArmSystem
 {
-private:
-	
-	int targetelevation;
-	int targetlength;
-	int targetclawopen;
-	
-	float elevatorpositionleft;
-	float elevatorpositionright;
-	float armposition;
-	float clawposition;
-
 public:
-	Servo left_elevator;
-	Servo right_elevator;
+	ArmSystem();
+	
+	void setElevator(int targetElevation);
+	void setArm(int targetlength);
+	void setClaw(int targetclawopen);
+	
+	bool elevatorAtPosition();
+	bool armAtPosition();
+	bool clawAtPosition();
+
+	void update();
+	
+	Servo motor_left;
+	Servo motor_right;
 	Servo arm;
 	Servo claw;
-	
-	I2CEncoder encoder_left_elevator;
-	I2CEncoder encoider_right_epevator;
+
+	I2CEncoder encoder_left;
+	I2CEncoder encoder_right;
 	I2CEncoder encoder_arm;
 	I2CEncoder encoder_claw;
-	
+
 	PID pid_elevator;
-	
-	ArmSystem();
-	void moveelevator(int targetelevation);
-	void extendarm(int targetlength);
-	void openclaw(int targetclawopen);
+
+private:
+	int targetElevator;
+	int targetArm;
+	int targetClaw;
 };
 
 #endif

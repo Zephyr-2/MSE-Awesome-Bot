@@ -17,7 +17,7 @@ void DriveSystem::update()
 	{
 		case DRIVE:
 		{
-      //uses a PID to try and match the current angle to the set angle
+			//uses a PID to try and match the current angle to the set angle
 			float offset = pid_drive.update(currentTheta - targetTheta);
 			
 			if(offset > 0)
