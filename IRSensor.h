@@ -2,7 +2,8 @@
 #define IRSENSOR_H
 
 #include "Arduino.h"
-#define NUM_TESTS  8
+#define NUM_TESTS  5
+#define NUM_RUNS   3.0
 
 class IRSensor
 {
@@ -15,34 +16,38 @@ public:
 
 	float read()
 	{
-		float voltages[NUM_TESTS];
+                float voltage = 0;
+                
+                for(int i = 0; i < NUM_RUNS; i++) {
+		  float voltages[NUM_TESTS];
 
-		for (int i = 0; i < NUM_TESTS; i++)
+		  for (int i = 0; i < NUM_TESTS; i++)
 			voltages[i] = analogRead(pin);
 
-		voltages[0] = getAverage(voltages, NUM_TESTS);
-        //return voltages[0];	
-		return pow(5913 / voltages[0], 1.127) - 0.037 * voltages[0] + 9.5;
+		  voltage += getAverage(voltages, NUM_TESTS) / NUM_RUNS;
+                }
+                
+                lastValue = 0.15*(pow(5913 / voltage, 1.127) - 0.037 * voltage + 9.5) + 0.85 * lastValue;
+		return lastValue;
 	}
 	
 private:
 	int pin;
+        float lastValue;
 
 	float getAverage(float array[], int arraySize)
 	{
-		int max = 0, min = 0;
+                int max = 0, min = 0;
 		float sum = array[0];
 
-		for (int i = 1; i < arraySize; i++)
-		{
+		for (int i = 1; i < arraySize; i++) {
+                        if(array[i] < array[min])
+                          min = i;
+                        else if(array[i] > array[max])
+                          max = i;
+                          
 			sum += array[i];
-
-			if (array[i] > array[max])
-				max = i;
-
-			if (array[i] < array[min])
-				min = i;
-		}
+                }
 
 		sum -= array[min] + array[max];
 

@@ -17,8 +17,8 @@ public:
 	
 	float update(float error)
 	{
-		area += error * (millis() - lastTime);
-		float u = Kp * error + Ki * area + Kd * (error - lastError) / (millis() - lastTime);
+		area += error * (millis() - lastTime) / 1000.0;
+		float u = Kp * error + Ki * area + Kd * (error - lastError) / (millis() - lastTime) * 1000;
 		lastError = error;
 		lastTime = millis();
 		return u;

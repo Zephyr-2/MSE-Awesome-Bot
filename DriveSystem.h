@@ -12,7 +12,7 @@
 #define MOTOR_BRAKE  1500
 
 #define CAL_WIDTH     21
-#define ANGLE_THRESHOLD 0.1
+#define ANGLE_THRESHOLD 0.03
 
 #include "Arduino.h"
 #include "PID.h"

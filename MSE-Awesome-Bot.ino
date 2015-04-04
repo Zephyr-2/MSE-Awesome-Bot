@@ -9,59 +9,58 @@
 #include <Wire.h>
 #include <I2CEncoder.h>
 
-#define ARM_LOWER
-#define ARM_UPPER
+#define WALL_DISTANCE  80
 
 DriveSystem drive;
-ArmSystem arm;
-UltrasonicSensor us_left(9, 10);
-UltrasonicSensor us_right(11, 12);
-IRSensor ir(A1);
+IRSensor ir(A0);
+UltrasonicSensor us(3,2);
 long time;
+int phase = 0;
+float minTheta = 0;
+float ir_last;
+
+PID pid_wall_follow(5,3,30);
 
 void setup()
 {
-	Serial.begin(115200);
+	Serial.begin(9600);
 	Wire.begin();
 
-	drive.motor_left.attach(2);
+	drive.motor_left.attach(9);
 	drive.motor_right.attach(8);
 
 	drive.encoder_right.init((10.2 * PI)*(1.0/3.0)*MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
 	drive.encoder_right.setReversed(true);  // adjust for positive count when moving forward
 	drive.encoder_left.init((10.2 * PI)*(1.0/3.0)*MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
-	drive.encoder_left.setReversed(true);  // adjust for positive count when moving forward
+	drive.encoder_left.setReversed(false);  // adjust for positive count when moving forward
+        
+        //calibrate ir sensor
+        for(int i = 0; i < 50; i++)
+          ir_last = ir.read();
 
-	arm.motor_left.attach(3);
-	arm.motor_right.attach(4);
-	arm.arm.attach(5);
-	arm.claw.attach(6);
-
-	arm.encoder_right.init(MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
-	arm.encoder_right.setReversed(true);  // adjust for positive count when moving forward
-	arm.encoder_left.init(MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
-	arm.encoder_left.setReversed(true);  // adjust for positive count when moving forward
-	arm.encoder_arm.init(MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
-	arm.encoder_arm.setReversed(true);  // adjust for positive count when moving forward
-	arm.encoder_claw.init(MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
-	arm.encoder_claw.setReversed(true);  // adjust for positive count when moving forward
-
+        Serial.println("done setup");
 	time = millis();
 }
 
 void loop()
 {
-	time = millis();
-
-	if(ir.read() < 50)
-	{
-                drive.turn(1700,250);
-	}
-	else if(ir.read() > 50)
-	{
-		drive.turn(1700,-250);
-	}
-	
-Serial.println("run");
-	delay(constrain(100 + time - millis(), 0, 100));
+  if(!drive.isReady());
+  else if(us.read() < WALL_DISTANCE + 5) {
+    drive.turnToAngle(1700, PI/2, true);
+    pid_wall_follow.reset();
+  }
+  else if(ir.read() - ir_last > 20 && ir.read() > WALL_DISTANCE)
+    drive.turn(1800, 300);
+  else {
+    float error = pid_wall_follow.update(ir.read() - WALL_DISTANCE);
+    if(error > 150)
+      drive.turn(1700, 150);
+    else if (error < -150)
+      drive.turn(1700, -150);
+    else
+      drive.turn(1700, error);
+  }
+    
+  drive.update();
+  delay(constrain(100 + time - millis(), 0, 100));
 }
