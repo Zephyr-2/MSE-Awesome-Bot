@@ -1,16 +1,10 @@
 #include "ArmSystem.h"
 
-ArmSystem::ArmSystem() : 
-pid_elevator(1,0,0)
+ArmSystem::ArmSystem() : pid_elevator(1,0,0)
 {
   targetElevator = 0;
   targetArm = 0;
   targetClaw = 0;
-
-  encoder_left.zero();
-  encoder_right.zero();
-  encoder_arm.zero();
-  encoder_claw.zero();
 }
 
 void ArmSystem::setElevator(int targetElevator)

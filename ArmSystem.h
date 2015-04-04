@@ -5,6 +5,7 @@
 #include "PID.h"
 #include <Servo.h>
 #include <I2CEncoder.h>
+#include <uSTimer2.h>
 #include <Wire.h>
 
 #define MOTOR_BRAKE			1500
@@ -13,8 +14,8 @@
 #define CLAW_THRESHOLD		0.1
 #define THRESHOLD           1000
 
-#define ARM_MAX
-#define CLAW_MAX
+#define ARM_MAX 10
+#define CLAW_MAX 10
 
 class ArmSystem
 {

@@ -12,6 +12,7 @@
 #define WALL_DISTANCE  80
 
 DriveSystem drive;
+ArmSystem arm;
 IRSensor ir(A0);
 UltrasonicSensor us(3,2);
 long time;
@@ -26,8 +27,8 @@ void setup()
 	Serial.begin(9600);
 	Wire.begin();
 
-	drive.motor_left.attach(9);
-	drive.motor_right.attach(8);
+	drive.motor_left.attach(10);
+	drive.motor_right.attach(11);
 
 	drive.encoder_right.init((10.2 * PI)*(1.0/3.0)*MOTOR_393_SPEED_ROTATIONS, MOTOR_393_TIME_DELTA);
 	drive.encoder_right.setReversed(true);  // adjust for positive count when moving forward
@@ -35,8 +36,10 @@ void setup()
 	drive.encoder_left.setReversed(false);  // adjust for positive count when moving forward
         
         //calibrate ir sensor
-        for(int i = 0; i < 50; i++)
+        for(int i = 0; i < 50; i++) {
           ir_last = ir.read();
+          us.read();
+        }
 
         Serial.println("done setup");
 	time = millis();
@@ -44,13 +47,17 @@ void setup()
 
 void loop()
 {
-  if(!drive.isReady());
+  if(!drive.isReady()) {
+    us.read();
+    ir_last = ir.read();
+  }
   else if(us.read() < WALL_DISTANCE + 5) {
-    drive.turnToAngle(1700, PI/2, true);
+    drive.turnToAngle(1700, PI/2 + 0.5, true);
     pid_wall_follow.reset();
   }
-  else if(ir.read() - ir_last > 20 && ir.read() > WALL_DISTANCE)
-    drive.turn(1800, 300);
+  else if(ir.read() - ir_last > 20 && ir.read() > WALL_DISTANCE) {
+    //drive.turn(1800, 300);
+  }
   else {
     float error = pid_wall_follow.update(ir.read() - WALL_DISTANCE);
     if(error > 150)

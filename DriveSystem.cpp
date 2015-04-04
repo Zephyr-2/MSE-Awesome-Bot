@@ -77,7 +77,7 @@ void DriveSystem::brake()
 
 bool DriveSystem::isReady()
 {
-	if(state == TURN_ANGLE && abs(targetTheta - currentTheta) < ANGLE_THRESHOLD)
+	if(state != TURN_ANGLE || abs(targetTheta - currentTheta) < ANGLE_THRESHOLD)
 		return true;
 	return false;
 }
