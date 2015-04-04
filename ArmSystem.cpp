@@ -1,6 +1,6 @@
 #include "ArmSystem.h"
 
-ArmSystem::ArmSystem() : pid_elevator(1,0,0)
+ArmSystem::ArmSystem()
 {
   targetElevator = 0;
   targetArm = 0;
@@ -10,7 +10,6 @@ ArmSystem::ArmSystem() : pid_elevator(1,0,0)
 void ArmSystem::setElevator(int targetElevator)
 {
   this->targetElevator = targetElevator;
-  pid_elevator.reset();
 }
 
 void ArmSystem::setArm(int targetArm)
@@ -46,34 +45,51 @@ bool ArmSystem::clawAtPosition()
 
 void ArmSystem::update()
 {
-  float ele = targetElevator - encoder_left.getPosition();
-  if(abs(ele) > THRESHOLD) {
-    motor_left.writeMicroseconds(MOTOR_BRAKE + (int)ele * 200);
-    motor_right.writeMicroseconds(MOTOR_BRAKE + (int)ele * 200);
+  float tmp = targetElevator - encoder_left.getPosition();
+  if(tmp > ELEVATOR_THRESHOLD) {
+    motor_left.writeMicroseconds(ELEVATOR_UNLOAD_UP);
+    motor_right.writeMicroseconds(ELEVATOR_UNLOAD_UP);
+  }
+  else if(tmp < ELEVATOR_THRESHOLD) {
+    motor_left.writeMicroseconds(ELEVATOR_UNLOAD_DOWN);
+    motor_right.writeMicroseconds(ELEVATOR_UNLOAD_DOWN);
   }
   else {
-    motor_left.writeMicroseconds(MOTOR_BRAKE);
-    motor_right.writeMicroseconds(MOTOR_BRAKE);
+    motor_left.writeMicroseconds(ELEVATOR_UNLOAD_BRAKE);
+    motor_right.writeMicroseconds(ELEVATOR_UNLOAD_BRAKE);
   }
 
-  float arm1 = targetArm - encoder_arm.getPosition();
-  if(abs(arm1) > THRESHOLD)
-  {
-    arm.writeMicroseconds(MOTOR_BRAKE + (int)arm1 * 200);
+  tmp = targetArm - encoder_arm.getPosition();
+  if(tmp > ARM_THRESHOLD) {
+    arm.writeMicroseconds(ARM_FOREWARD);
   }
-  else
-  {
+  else if(tmp < ARM_THRESHOLD) {
+    arm.writeMicroseconds(ARM_RETRACT);
+  }
+  else {
    arm.writeMicroseconds(MOTOR_BRAKE);
   }
 
-  float claw1 = targetClaw - encoder_claw.getPosition();
-  if(abs(claw1) > THRESHOLD)
-  {
-    claw.writeMicroseconds(MOTOR_BRAKE + (int)claw1 * 200);
+  tmp = targetClaw - encoder_claw.getPosition();
+  if(tmp > CLAW_THRESHOLD) {
+    claw.writeMicroseconds(CLAW_OPEN);
   }
-  else
-  {
+  else if(tmp < CLAW_THRESHOLD) {
+    claw.writeMicroseconds(CLAW_CLOSE);
+  }
+  else {
     claw.writeMicroseconds(MOTOR_BRAKE);
+  }
+  
+  tmp = targetTheta - encoder_tower.getPosition();
+  if(tmp > TOWER_THRESHOLD) {
+    tower.writeMicroseconds(TOWER_LEFT);
+  }
+  else if(tmp < TOWER_THRESHOLD) {
+    tower.writeMicroseconds(TOWER_RIGHT);
+  }
+  else {
+    tower.writeMicroseconds(MOTOR_BRAKE);
   }
 }
 

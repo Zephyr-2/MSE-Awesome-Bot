@@ -8,7 +8,7 @@
 #include <uSTimer2.h>
 #include <Wire.h>
 
-#define MOTOR_BRAKE			1500
+#define MOTOR_BRAKE	        1500
 #define ELEVATOR_THRESHOLD	0.1
 #define ARM_THRESHOLD		0.1
 #define CLAW_THRESHOLD		0.1
@@ -16,6 +16,16 @@
 
 #define ARM_MAX 10
 #define CLAW_MAX 10
+
+#define ELEVATOR_UNLOAD_BRAKE  1550
+#define ELEVATOR_UNLOAD_UP     1700
+#define ELEVATOR_UNLOAD_DOWN   1500
+#define ELEVATOR_LOAD_BRAKE    1600
+#define ELEVATOR_LOAD_UP       1800
+#define ELEVATOR_LOAD_DOWN     1550
+
+#define ARM_FOREWARD
+#define ARM_RETRACT
 
 class ArmSystem
 {
@@ -25,10 +35,12 @@ public:
 	void setElevator(int targetElevation);
 	void setArm(int targetlength);
 	void setClaw(int targetclawopen);
+        void setTower(int targetTheta);
 	
 	bool elevatorAtPosition();
 	bool armAtPosition();
 	bool clawAtPosition();
+        bool towerAtPosition();
 
 	void update();
 	
@@ -36,18 +48,21 @@ public:
 	Servo motor_right;
 	Servo arm;
 	Servo claw;
+        Servo tower;
 
 	I2CEncoder encoder_left;
 	I2CEncoder encoder_right;
 	I2CEncoder encoder_arm;
 	I2CEncoder encoder_claw;
-
-	PID pid_elevator;
+        I2CEncoder encoder_tower;
 
 private:
 	int targetElevator;
 	int targetArm;
 	int targetClaw;
+        int targetTheta;
+        
+        bool loaded;
 };
 
 #endif
