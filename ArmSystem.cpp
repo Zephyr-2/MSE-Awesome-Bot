@@ -11,6 +11,7 @@ pid_elevator(1,0,0)
   encoder_right.zero();
   encoder_arm.zero();
   encoder_claw.zero();
+  encoder_rotator.zero();
 }
 
 void ArmSystem::setElevator(int targetElevator)
@@ -27,6 +28,11 @@ void ArmSystem::setArm(int targetArm)
 void ArmSystem::setClaw(int targetClaw)
 {
   this->targetClaw = targetClaw;
+}
+
+void ArmSystem::setRotation(int targetAngle)
+{
+  this->targetAngle = targetAngle;
 }
 
 bool ArmSystem::elevatorAtPosition()
@@ -47,6 +53,13 @@ bool ArmSystem::clawAtPosition()
 {
   if(abs(targetClaw - encoder_claw.getPosition()) < CLAW_THRESHOLD)
     return true;
+  return false;
+}
+
+bool ArmSystem::rotateAtPosition()
+{
+  if(abs(targetAngle - encoder_rotator.getPosition())<ANGLE_THRESHOLD)
+	  return true;
   return false;
 }
 
