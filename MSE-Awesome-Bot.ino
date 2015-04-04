@@ -58,7 +58,8 @@ void setup()
 
 void loop()
 {
-  //section = 9;
+  //for testing
+  section = 9;
   switch(section)
   {  
     case(0):
@@ -128,10 +129,10 @@ void loop()
     case(9):
     {
       // Pickup Empty Waterbottle
+      arm.setRotation(100);
       
       
-      
-      section = 10;
+     //for testing section = 10;
     };
     case(10):
     {
