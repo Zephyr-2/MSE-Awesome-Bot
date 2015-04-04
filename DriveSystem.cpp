@@ -1,6 +1,6 @@
 #include "DriveSystem.h"
 
-DriveSystem::DriveSystem() : pid_drive(1,0,0), pid_turn_angle(1,0,0)
+DriveSystem::DriveSystem()
 {
 	targetTheta = 0;
 	targetSpeed = MOTOR_BRAKE;
@@ -17,29 +17,15 @@ void DriveSystem::update()
 	{
 		case DRIVE:
 		{
-			//uses a PID to try and match the current angle to the set angle
-			float offset = pid_drive.update(currentTheta - targetTheta);
-			
-			if(offset > 0)
-			{
-				motor_left.writeMicroseconds(targetSpeed);
-				motor_right.writeMicroseconds(targetSpeed - (int) offset);
-			}
-			else
-			{
-				motor_left.writeMicroseconds(targetSpeed - (int) offset);
-				motor_right.writeMicroseconds(targetSpeed);
-			}
+			motor_left.writeMicroseconds(targetSpeed);
+			motor_right.writeMicroseconds(targetSpeed);
 		}
 		break;
 		
-		case TURN:
+		case TURN_ANGLE:
 		{
-			float angle_offset = pid_turn_angle.update(constrainTheta(targetTheta - currentTheta));
-			angle_offset *= targetSpeed - MOTOR_BRAKE;
-
-			motor_left.writeMicroseconds(constrain(MOTOR_BRAKE - angle_offset, MOTOR_MIN, MOTOR_MAX));
-			motor_right.writeMicroseconds(constrain(MOTOR_BRAKE + angle_offset, MOTOR_MIN, MOTOR_MAX));
+			motor_left.writeMicroseconds(constrain(MOTOR_BRAKE, MOTOR_MIN, MOTOR_MAX));
+			motor_right.writeMicroseconds(constrain(MOTOR_BRAKE, MOTOR_MIN, MOTOR_MAX));
 		}
 		break;
 		
@@ -49,13 +35,24 @@ void DriveSystem::update()
 			motor_right.writeMicroseconds(MOTOR_BRAKE);
 		}
 		break;
+
+		case TURN:
+		{
+			if(targetTheta >= 0) {
+				motor_left.writeMicroseconds(targetSpeed);
+				motor_right.writeMicroseconds(map(targetTheta, 0, 1000, targetSpeed, 2*MOTOR_BRAKE-targetSpeed));
+			}
+			else {
+				motor_left.writeMicroseconds(map(targetTheta, 0, -1000, targetSpeed, 2*MOTOR_BRAKE-targetSpeed));
+				motor_right.writeMicroseconds(targetSpeed);
+			}
+		}
 	}
 }
 
 void DriveSystem::drive(int targetSpeed)
 {
 	state = DRIVE;
-	pid_drive.reset();
 	
 	targetTheta = currentTheta;
 	this->targetSpeed = constrain(targetSpeed, MOTOR_MIN, MOTOR_MAX);
@@ -66,17 +63,27 @@ void DriveSystem::brake()
 	state = STOP;
 }
 
-void DriveSystem::turn(int targetSpeed, float targetTheta)
+bool DriveSystem::isReady()
 {
-	state = TURN;
-	pid_turn_angle.reset();
+	if(abs(targetTheta - currentTheta) < ANGLE_THRESHOLD)
+		return true;
+	return false;
+}
+
+void DriveSystem::turnToAngle(int targetSpeed, float targetTheta, bool isRelative)
+{
+	state = TURN_ANGLE;
 	
 	this->targetSpeed = constrain(targetSpeed, MOTOR_MIN, MOTOR_MAX);
-	this->targetTheta = targetTheta;
+	this->targetTheta = targetTheta + (isRelative) ? currentTheta : 0;
 	constrainTheta(targetTheta);
-	
-	encoder_left.zero();
-	encoder_right.zero();
+}
+
+void DriveSystem::turn(int targetSpeed, int turnRadius)
+{
+	state = TURN;
+	this->targetTheta = constrain(turnRadius, -1000, 1000);
+	this->targetSpeed = targetSpeed;
 }
 
 void DriveSystem::updatePositionAndTheta()

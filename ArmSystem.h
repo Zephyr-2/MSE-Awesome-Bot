@@ -11,7 +11,7 @@
 #define ELEVATOR_THRESHOLD	0.1
 #define ARM_THRESHOLD		0.1
 #define CLAW_THRESHOLD		0.1
-#define THRESHOLD               1000
+#define THRESHOLD           1000
 
 #define ARM_MAX
 #define CLAW_MAX
