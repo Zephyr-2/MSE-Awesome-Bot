@@ -94,5 +94,15 @@ void ArmSystem::update()
   {
     claw.writeMicroseconds(MOTOR_BRAKE);
   }
+  
+  float rotate = targetAngle - encoder_rotator.getPosition();
+  if (abs(rotate) > THRESHOLD)
+  {
+    rotator.writeMicroseconds(MOTOR_BRAKE + (int)rotate * 200);
+  }
+  else
+  {
+    rotator.writeMicroseconds(MOTOR_BRAKE);
+  }  
 }
 
