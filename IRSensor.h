@@ -2,8 +2,8 @@
 #define IRSENSOR_H
 
 #include "Arduino.h"
-#define NUM_TESTS  5
-#define NUM_RUNS   3.0
+#define NUM_TESTS  4
+#define NUM_RUNS   15.0
 
 class IRSensor
 {
@@ -12,23 +12,25 @@ public:
 	{
 		(*this).pin = pin;
 		pinMode(pin, INPUT);
+                
+                lastValue = 70;
 	}
 
 	float read()
 	{
-                float voltage = 0;
-                
-                for(int i = 0; i < NUM_RUNS; i++) {
+            float voltage = 0;
+            
+            for(int i = 0; i < NUM_RUNS; i++) {
 		  float voltages[NUM_TESTS];
 
 		  for (int i = 0; i < NUM_TESTS; i++)
 			voltages[i] = analogRead(pin);
 
 		  voltage += getAverage(voltages, NUM_TESTS) / NUM_RUNS;
-                }
-                
-                lastValue = 0.15*(pow(5913 / voltage, 1.127) - 0.037 * voltage + 9.5) + 0.85 * lastValue;
-		return lastValue;
+            }
+            
+            lastValue = 0.4*lastValue + 0.6*(22359*pow(voltage, -0.79) - 12603*pow(voltage, -0.724) - 18.1);
+            return lastValue;
 	}
 	
 private:

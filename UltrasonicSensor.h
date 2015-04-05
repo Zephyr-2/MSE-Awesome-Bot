@@ -3,7 +3,8 @@
 
 #include "Arduino.h"
 
-#define NUM_TESTS  5
+#define NUM_TESTS  3
+#define NUM_AVERAGE   6
 
 class UltrasonicSensor
 {
@@ -16,28 +17,37 @@ public:
 		pinMode(pingPin, OUTPUT);
 		pinMode(dataPin, INPUT);
 
-		lastValue = 100;
+                counter = 0;
 	}
 
 	float read()
 	{
-                float values[NUM_TESTS];
+                float value = 0;
                 
-                for(int i = 0; i < NUM_TESTS; i++) {
-		  digitalWrite(pingPin, HIGH);
-		  delayMicroseconds(10);
-		  digitalWrite(pingPin, LOW);
-                  values[i] = pulseIn(dataPin, HIGH, 10000);
-                  delayMicroseconds(20);
+                for(int i = 0; i < 2; i++) {
+		  float values[5];
+
+		  for (int i = 0; i < 4; i++) {
+                    digitalWrite(pingPin, HIGH);
+		    delayMicroseconds(10);
+		    digitalWrite(pingPin, LOW);
+                    values[i] =  pulseIn(dataPin, HIGH, 10000);
+                  }
+
+		  value += getAverage(values, 4);
                 }
-		lastValue = 0.2*(0.0174 * 1.5 * getAverage(values, NUM_TESTS) - 1.56) + 0.8*lastValue;
-		return lastValue;
+                
+                if(++counter == 7) counter = 0;
+                lastValues[counter] = (lastValues[0] + lastValues[1] + lastValues[2] + lastValues[3] + lastValues[4] + lastValues[5] + lastValues[6] + value) / 9;
+                
+                return lastValues[counter] / 56.18 - 1.66;
 	}
 
 private:
 	int pingPin;
 	int dataPin;
-	float lastValue;
+        float lastValues[7];
+        int counter;
 
         float getAverage(float array[], int arraySize)
 	{

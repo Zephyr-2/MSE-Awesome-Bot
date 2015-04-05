@@ -9,23 +9,29 @@
 #include <Wire.h>
 
 #define MOTOR_BRAKE	        1500
-#define ELEVATOR_THRESHOLD	0.1
-#define ARM_THRESHOLD		0.1
-#define CLAW_THRESHOLD		0.1
-#define THRESHOLD           1000
 
 #define ARM_MAX 10
 #define CLAW_MAX 10
 
 #define ELEVATOR_UNLOAD_BRAKE  1550
-#define ELEVATOR_UNLOAD_UP     1700
-#define ELEVATOR_UNLOAD_DOWN   1500
+#define ELEVATOR_UNLOAD_UP     1750
+#define ELEVATOR_UNLOAD_DOWN   1450
 #define ELEVATOR_LOAD_BRAKE    1600
 #define ELEVATOR_LOAD_UP       1800
 #define ELEVATOR_LOAD_DOWN     1550
+#define ELEVATOR_THRESHOLD     2
 
-#define ARM_FOREWARD
-#define ARM_RETRACT
+#define ARM_FOREWARD           1800
+#define ARM_RETRACT            1200
+#define ARM_THRESHOLD          2
+
+#define CLAW_CLOSE             1300
+#define CLAW_OPEN              1700
+#define CLAW_THRESHOLD         10
+
+#define TOWER_LEFT             1700
+#define TOWER_RIGHT            1300
+#define TOWER_THRESHOLD        3
 
 class ArmSystem
 {
@@ -60,7 +66,7 @@ private:
 	int targetElevator;
 	int targetArm;
 	int targetClaw;
-        int targetTheta;
+        int targetTower;
         
         bool loaded;
 };
