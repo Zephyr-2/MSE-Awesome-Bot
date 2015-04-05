@@ -23,9 +23,15 @@ void ArmSystem::setClaw(int targetClaw)
   this->targetClaw = targetClaw;
 }
 
+<<<<<<< HEAD
 void ArmSystem::setTower(int targetTower)
 {
   this->targetTower = targetTower;
+=======
+void ArmSystem::setTower(int targetTheta)
+{
+  this->targetTheta = targetTheta;
+>>>>>>> origin/arm_test
 }
 
 bool ArmSystem::elevatorAtPosition()
@@ -45,6 +51,13 @@ bool ArmSystem::armAtPosition()
 bool ArmSystem::clawAtPosition()
 {
   if(abs(targetClaw - encoder_claw.getPosition()) < CLAW_THRESHOLD)
+    return true;
+  return false;
+}
+
+bool ArmSystem::towerAtPosition()
+{
+  if(abs(targetTheta - encoder_tower.getPosition()) < TOWER_THRESHOLD)
     return true;
   return false;
 }
