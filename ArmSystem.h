@@ -12,6 +12,7 @@
 #define ELEVATOR_THRESHOLD	0.1
 #define ARM_THRESHOLD		0.1
 #define CLAW_THRESHOLD		0.1
+#define TOWER_THRESHOLD         0.1
 #define THRESHOLD           1000
 
 #define ARM_MAX 10
@@ -24,8 +25,14 @@
 #define ELEVATOR_LOAD_UP       1800
 #define ELEVATOR_LOAD_DOWN     1550
 
-#define ARM_FOREWARD
-#define ARM_RETRACT
+#define ARM_FOREWARD  1700
+#define ARM_RETRACT   1300
+
+#define CLAW_OPEN     1700
+#define CLAW_CLOSE    1300
+
+#define TOWER_RIGHT   1700
+#define TOWER_LEFT    1300
 
 class ArmSystem
 {
