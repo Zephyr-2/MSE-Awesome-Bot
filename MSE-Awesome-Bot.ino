@@ -15,22 +15,22 @@
 #define SCAN_WALL         0
 #define SCAN_STOP         1
 #define SCAN_TURN         2
-#define SCAN_TO_WALL      3
-#define SCAN_IR           4
+#define TIME_DRIVE        3
+#define TIME_DRIVE_2      4
 
-#define SCAN_DISTANCE            70
-#define SCAN_DISTANCE_THRESHOLD  5
+#define SCAN_DISTANCE            50
+#define SCAN_DISTANCE_THRESHOLD  10
 #define SCAN_FAR                 3
 #define SCAN_NEAR                1
 #define SCAN_FAR_SLOPE           40
 #define SCAN_NEAR_SLOPE          100
-#define SCAN_STOP_TIME           50
-#define SCAN_IR_THRESHOLD        20
+#define SCAN_STOP_TIME           500
+#define SCAN_IR_THRESHOLD        13
 #define TABLE_HEIGHT_LOWER       20
 
 DriveSystem drive;
 ArmSystem arm;
-IRSensor ir(A3);
+IRSensor ir(A0);
 UltrasonicSensor us_front(3, 4);
 UltrasonicSensor us_side(2, 2);
 
@@ -38,6 +38,7 @@ int state;
 
 long time;
 long timer;
+long drive_timer;
 float minTheta = 0;
 
 int turnDir, nextState;
@@ -74,8 +75,9 @@ void setup()
 
         Serial.println("done setup");
 	time = millis();
+        drive_timer = -1;
         
-        state = SCAN_TO_WALL;
+        state = SCAN_WALL;
 }
 
 void loop()
@@ -86,8 +88,6 @@ void loop()
   us_front.read();
   us_side.read();
   
-  Serial.println(analogRead(A3));
-  
   float tmp;
   
   switch(state) {
@@ -96,18 +96,12 @@ void loop()
       
       if(usInFront()) {
         turn(LEFT, SCAN_WALL);
-        return;
+        break;
       }
       
-      if(usSideChange()) {
-        turn(RIGHT, SCAN_TO_WALL);
-        return; 
-      }
-      
-      if(irInFront()) {
-        arm.setTower(90);
-        turn(LEFT, SCAN_IR);
-        return;
+      if(usOffSide()) {
+        turn(RIGHT, TIME_DRIVE);
+        break;
       }
       
       if(us_side.current() > SCAN_DISTANCE + SCAN_DISTANCE_THRESHOLD)
@@ -129,7 +123,7 @@ void loop()
     
     case SCAN_STOP:
       if(millis() > timer) {
-        drive.turnToAngle(1700, (turnDir) ? PI/2 : -PI/2, true);
+        drive.turnToAngle(1700, (turnDir) ? -PI/2 : PI/2, true);
         state = SCAN_TURN;
       }
     break;
@@ -139,34 +133,32 @@ void loop()
         state = nextState;
     break;
     
-    case SCAN_TO_WALL:
-      if(usInFront()) {
-        turn(LEFT, SCAN_WALL);
-        return;
-      }
-      
-      if(irInFront()) {
-        arm.setTower(90);
-        turn(LEFT, SCAN_IR);
-        return;
-      }
-      
-      drive.turn(1700, 0);
-    break;
+    case TIME_DRIVE:
     
-    case SCAN_IR:
-      if(usInFront()) {
-        arm.setTower(0);
-        turn(LEFT, SCAN_WALL);
-        return;
-      }
-      
-      if(!irInFront()) {
-        turn(RIGHT, SCAN_IR);
+      if(drive_timer == -1)
+        drive_timer = millis() + 1000;
+        
+      if(millis() > drive_timer) {
+        turn(RIGHT, TIME_DRIVE_2);
+        drive_timer = -1;
+        break;
       }
       
       drive.turn(1700, 0);
-    break;
+     break;
+     
+     case TIME_DRIVE_2:
+         if(drive_timer == -1)
+          drive_timer = millis() + 1000;
+          
+         if(millis() > drive_timer) {
+          state = SCAN_WALL;
+          drive_timer = -1;
+          break;
+        }
+        
+        drive.turn(1700, 0);
+      break;
   }
   
   arm.update();
@@ -176,11 +168,11 @@ void loop()
 }
 
 bool usInFront() {
-  return us_front.current() < SCAN_DISTANCE + 10 && ir.current() > SCAN_DISTANCE + SCAN_DISTANCE_THRESHOLD;
+  return us_front.current() < SCAN_DISTANCE && ir.current() > SCAN_DISTANCE + SCAN_DISTANCE_THRESHOLD;
 }
 
-bool usSideChange() {
-  return us_side.slope() > 10 && us_side.current() > SCAN_DISTANCE + 2 * SCAN_DISTANCE_THRESHOLD;
+bool usOffSide() {
+  return us_side.current() > SCAN_DISTANCE + 2 * SCAN_DISTANCE_THRESHOLD;
 }
 
 bool irInFront() {

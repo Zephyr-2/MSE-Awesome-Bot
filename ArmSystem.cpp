@@ -100,10 +100,10 @@ void ArmSystem::update()
   
   tmp = targetTower - encoder_tower.getPosition();
   if(tmp > TOWER_THRESHOLD) {
-    tower.writeMicroseconds(TOWER_LEFT);
+    tower.writeMicroseconds(TOWER_RIGHT);
   }
   else if(tmp < -TOWER_THRESHOLD) {
-    tower.writeMicroseconds(TOWER_RIGHT);
+    tower.writeMicroseconds(TOWER_LEFT);
   }
   else {
     tower.writeMicroseconds(MOTOR_BRAKE);

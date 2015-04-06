@@ -30,7 +30,7 @@ public:
 		  voltage += getAverage(voltages, NUM_TESTS) / NUM_RUNS;
             }
             
-            cur = 22359*pow(voltage, -0.79) - 12603*pow(voltage, -0.724) - 18.1;
+            cur = 159.36 * exp(-0.005*voltage);
 	}
 
         float current()
