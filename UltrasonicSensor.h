@@ -3,70 +3,57 @@
 
 #include "Arduino.h"
 
-#define NUM_TESTS  3
-#define NUM_AVERAGE   6
-
 class UltrasonicSensor
 {
 public:
-	UltrasonicSensor(int pingPin, int dataPin)
+	UltrasonicSensor(int pingPin, int echoPin)
 	{
 		this->pingPin = pingPin;
-		this->dataPin = dataPin;
+		this->echoPin = echoPin;
 
-		pinMode(pingPin, OUTPUT);
-		pinMode(dataPin, INPUT);
-
-                counter = 0;
+                slo = 0;
+                t_slo = millis();
+                read();
 	}
 
-	float read()
+	void read()
 	{
-                float value = 0;
+                las = cur;
                 
-                for(int i = 0; i < 2; i++) {
-		  float values[5];
-
-		  for (int i = 0; i < 4; i++) {
-                    digitalWrite(pingPin, HIGH);
-		    delayMicroseconds(10);
-		    digitalWrite(pingPin, LOW);
-                    values[i] =  pulseIn(dataPin, HIGH, 10000);
-                  }
-
-		  value += getAverage(values, 4);
-                }
+                pinMode(pingPin, OUTPUT);
+                digitalWrite(pingPin, LOW);
+                delayMicroseconds(2);
+                digitalWrite(pingPin, HIGH);
+                delayMicroseconds(5);
+                digitalWrite(pingPin, LOW);
+              
+                pinMode(echoPin, INPUT);
+                cur = pulseIn(echoPin, HIGH) / 58;
                 
-                if(++counter == 7) counter = 0;
-                lastValues[counter] = (lastValues[0] + lastValues[1] + lastValues[2] + lastValues[3] + lastValues[4] + lastValues[5] + lastValues[6] + value) / 9;
-                
-                return lastValues[counter] / 56.18 - 1.66;
+                slo = 1000.0 * (cur - las) / (millis() - t_slo);
+                t_slo = millis();
 	}
+
+        long current()
+        {
+          return cur;
+        }
+
+        long last()
+        {
+          return las;
+        }
+        
+        float slope()
+        {
+          return slo;
+        }
 
 private:
 	int pingPin;
-	int dataPin;
-        float lastValues[7];
-        int counter;
-
-        float getAverage(float array[], int arraySize)
-	{
-                int max = 0, min = 0;
-		float sum = array[0];
-
-		for (int i = 1; i < arraySize; i++) {
-                        if(array[i] < array[min])
-                          min = i;
-                        else if(array[i] > array[max])
-                          max = i;
-                          
-			sum += array[i];
-                }
-
-		sum -= array[min] + array[max];
-
-		return sum / (arraySize - 2);
-	}
+	int echoPin;
+        long cur, las, t_slo;
+        float slo;
 };
 
 #endif

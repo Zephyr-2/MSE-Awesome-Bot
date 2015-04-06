@@ -13,11 +13,14 @@ public:
 		(*this).pin = pin;
 		pinMode(pin, INPUT);
                 
-                lastValue = 70;
+                slo = 0;
+                t_slo = millis();
+                read();
 	}
 
-	float read()
+	void read()
 	{
+            las = cur;
             float voltage = 0;
             
             for(int i = 0; i < NUM_RUNS; i++) {
@@ -29,13 +32,30 @@ public:
 		  voltage += getAverage(voltages, NUM_TESTS) / NUM_RUNS;
             }
             
-            lastValue = 0.4*lastValue + 0.6*(22359*pow(voltage, -0.79) - 12603*pow(voltage, -0.724) - 18.1);
-            return lastValue;
+            cur = 0.4*cur + 0.6*(22359*pow(voltage, -0.79) - 12603*pow(voltage, -0.724) - 18.1);
+            slo = 1000.0 * (cur - las) / (millis() - t_slo);
+            t_slo = millis();
 	}
+
+        float current()
+        {
+          return cur;
+        }
+        
+        float last()
+        {
+          return las;
+        }
+        
+        float slope()
+        {
+          return slo;
+        }
 	
 private:
 	int pin;
-        float lastValue;
+        float cur, las, slo;
+        long t_slo;
 
 	float getAverage(float array[], int arraySize)
 	{

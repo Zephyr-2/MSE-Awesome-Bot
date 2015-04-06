@@ -14,7 +14,7 @@ DriveSystem::DriveSystem()
 void DriveSystem::update()
 {
 	updatePositionAndTheta();
-	
+
 	switch(state)
 	{
 		case DRIVE:
@@ -85,13 +85,10 @@ bool DriveSystem::isReady()
 void DriveSystem::turnToAngle(int targetSpeed, float targetTheta, bool isRelative)
 {
 	state = TURN_ANGLE;
-        Serial.println(targetTheta);
-        Serial.println(currentTheta);
-        Serial.println(" ");
 	
 	this->targetSpeed = constrain(targetSpeed, MOTOR_MIN, MOTOR_MAX);
 	this->targetTheta = targetTheta;
-        if(isRelative) targetTheta += currentTheta;
+        if(isRelative) this->targetTheta += currentTheta;
 }
 
 void DriveSystem::turn(int targetSpeed, int turnRadius)
