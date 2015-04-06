@@ -21,7 +21,7 @@
 #define HAS_BOTTLE        6
 #define AT_DOOR           7
 
-#define SCAN_DISTANCE            50
+#define SCAN_DISTANCE            30
 #define SCAN_DISTANCE_THRESHOLD  10
 #define SCAN_FAR                 3
 #define SCAN_NEAR                1
@@ -42,6 +42,7 @@ int state;
 long time;
 long timer;
 long drive_timer;
+long last_light, current_light;
 float minTheta = 0;
 
 int turnDir, nextState;
@@ -79,6 +80,9 @@ void setup()
   Serial.println("done setup");
   time = millis();
   drive_timer = -1;
+  
+  current_light = analogRead(A1);
+  last_light = current_light;
 
   state = SCAN_WALL;
 }
@@ -90,20 +94,24 @@ void loop()
   ir.read();
   us_front.read();
   us_side.read();
+  current_light = analogRead(A1);
 
   float tmp;
 
   switch(state) {
   case SCAN_WALL:
+  
+    if(!arm.towerAtPosition())
+      break;
     //put light detection code here
-    if ((analogRead(A1) < 40) && (us_side.current() < 10))
+    if (current_light > last_light && last_light < 80 && us_side.current() < 10)
     {
       drive.brake();
       drive.drive(1700);
       state = AT_DOOR;
       break; 
     }
-    else if (analogRead(A1) < 40)
+    else if (current_light > last_light && last_light < 80)
     {
       drive.brake();
       arm.setTower(90);
@@ -113,7 +121,7 @@ void loop()
     }
     else
     {
-      arm.setElevator(75);
+      //arm.setElevator(75);
     }
 
 
@@ -123,7 +131,7 @@ void loop()
     }
 
     if(usOffSide()) {
-      turn(RIGHT, TIME_DRIVE);
+      state = TIME_DRIVE;
       break;
     }
 
@@ -200,6 +208,7 @@ void loop()
 
   arm.update();
   drive.update();
+  last_light = current_light;
 
   delay(constrain(100 + time - millis(), 0, 100));
 }
@@ -209,7 +218,7 @@ bool usInFront() {
 }
 
 bool usOffSide() {
-  return us_side.current() > SCAN_DISTANCE + 3 * SCAN_DISTANCE_THRESHOLD;
+  return us_side.current() > 2 * SCAN_DISTANCE + SCAN_DISTANCE_THRESHOLD;
 }
 
 bool irInFront() {

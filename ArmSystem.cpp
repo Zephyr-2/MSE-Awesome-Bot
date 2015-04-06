@@ -72,8 +72,8 @@ void ArmSystem::update()
     motor_right.writeMicroseconds(MOTOR_BRAKE);
   }
   else {
-    motor_left.writeMicroseconds(ELEVATOR_UNLOAD_BRAKE);
-    motor_right.writeMicroseconds(ELEVATOR_UNLOAD_BRAKE);
+    motor_left.writeMicroseconds(MOTOR_BRAKE);
+    motor_right.writeMicroseconds(MOTOR_BRAKE);
   }
 
   tmp = targetArm - encoder_arm.getPosition();
