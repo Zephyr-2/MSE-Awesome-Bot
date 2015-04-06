@@ -114,41 +114,41 @@ void loop()
       arm.setElevator(75);
     }
 
-    //    if(us_front.current() < SCAN_DISTANCE + 10 && (ir.current() < 10 || ir.current() > 65)) {
-    //      drive.brake();
-    //      timer = millis() + SCAN_STOP_TIME;
-    //      state = SCAN_STOP;
-    //      return;
-    //    }
-    //
-    //    if(us_side.current() > SCAN_DISTANCE + SCAN_DISTANCE_THRESHOLD)
-    //      tmp = (us_side.slope() + SCAN_FAR) * SCAN_FAR_SLOPE;
-    //    else if(us_side.current() < SCAN_DISTANCE - SCAN_DISTANCE_THRESHOLD)
-    //      tmp = (us_side.slope() - SCAN_FAR) * SCAN_FAR_SLOPE;
-    //    else if(abs(us_side.slope()) > SCAN_NEAR)
-    //      tmp = us_side.slope() * SCAN_NEAR_SLOPE;
-    //    else
-    //      tmp = 0;
-    //
-    //    if(tmp > 200)
-    //      tmp = 200;
-    //    else if(tmp < -200)
-    //      tmp = -200;
-    //
-    //    drive.turn(1700, tmp);
+    if(us_front.current() < SCAN_DISTANCE + 10 && (ir.current() < 10 || ir.current() > 65)) {
+      drive.brake();
+      timer = millis() + SCAN_STOP_TIME;
+      state = SCAN_STOP;
+      return;
+    }
+
+    if(us_side.current() > SCAN_DISTANCE + SCAN_DISTANCE_THRESHOLD)
+      tmp = (us_side.slope() + SCAN_FAR) * SCAN_FAR_SLOPE;
+    else if(us_side.current() < SCAN_DISTANCE - SCAN_DISTANCE_THRESHOLD)
+      tmp = (us_side.slope() - SCAN_FAR) * SCAN_FAR_SLOPE;
+    else if(abs(us_side.slope()) > SCAN_NEAR)
+      tmp = us_side.slope() * SCAN_NEAR_SLOPE;
+    else
+      tmp = 0;
+
+    if(tmp > 200)
+      tmp = 200;
+    else if(tmp < -200)
+      tmp = -200;
+
+    drive.turn(1700, tmp);
     break;
-    //
-    //  case SCAN_STOP:
-    //    if(millis() > timer) {
-    //      drive.turnToAngle(1700, PI/2, true);
-    //      state = SCAN_TURN;
-    //    }
-    //    break;
-    //
-    //  case SCAN_TURN:
-    //    if(drive.isReady())
-    //      state = SCAN_FOLLOW_WALL;
-    //    break;
+
+  case SCAN_STOP:
+    if(millis() > timer) {
+      drive.turnToAngle(1700, PI/2, true);
+      state = SCAN_TURN;
+    }
+    break;
+
+  case SCAN_TURN:
+    if(drive.isReady())
+      state = SCAN_FOLLOW_WALL;
+    break;
 
   case AT_TABLE:
     Serial.println(ir.current());
@@ -172,6 +172,7 @@ void loop()
 
   delay(constrain(100 + time - millis(), 0, 100));
 }
+
 
 
 
