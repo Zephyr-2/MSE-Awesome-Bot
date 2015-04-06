@@ -13,9 +13,7 @@ public:
 		(*this).pin = pin;
 		pinMode(pin, INPUT);
                 
-                slo = 0;
-                t_slo = millis();
-                read();
+                cur = 0;
 	}
 
 	void read()
@@ -32,9 +30,7 @@ public:
 		  voltage += getAverage(voltages, NUM_TESTS) / NUM_RUNS;
             }
             
-            cur = 0.4*cur + 0.6*(22359*pow(voltage, -0.79) - 12603*pow(voltage, -0.724) - 18.1);
-            slo = 1000.0 * (cur - las) / (millis() - t_slo);
-            t_slo = millis();
+            cur = 22359*pow(voltage, -0.79) - 12603*pow(voltage, -0.724) - 18.1;
 	}
 
         float current()
@@ -46,16 +42,10 @@ public:
         {
           return las;
         }
-        
-        float slope()
-        {
-          return slo;
-        }
 	
 private:
 	int pin;
-        float cur, las, slo;
-        long t_slo;
+        float cur, las;
 
 	float getAverage(float array[], int arraySize)
 	{
