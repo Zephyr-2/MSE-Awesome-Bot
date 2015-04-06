@@ -40,9 +40,11 @@ UltrasonicSensor us_side(2, 2);
 int state;
 
 long time;
+long doorDriveTime;
 long timer;
 long drive_timer;
-long last_light, current_light;
+long last_light, current_light, average_light(0), sum_light;
+int lightcount = 0;
 float minTheta = 0;
 
 int turnDir, nextState;
@@ -94,7 +96,18 @@ void loop()
   ir.read();
   us_front.read();
   us_side.read();
+
   current_light = analogRead(A1);
+
+  average_light += current_light;
+  average_light = average_light/lightcount; 
+  
+  lightcount++;
+  if(lightcount > 10)
+  {
+  average_light = 0;
+  lightcount = 0;
+  }
 
   float tmp;
 
@@ -103,7 +116,6 @@ void loop()
   
     if(!arm.towerAtPosition())
       break;
-    //put light detection code here
     if (current_light > last_light && last_light < 80 && us_side.current() < 10)
     {
       drive.brake();
@@ -151,6 +163,17 @@ void loop()
 
     drive.turn(1700, tmp);
     break;
+
+  case AT_DOOR:
+
+    drive.turnToAngle(1700, -PI/2, 1);
+	doorDriveTime = time;
+	if((time-doorDriveTime)<3000)
+	{
+	   drive.drive(1700);
+	}
+	case = SCAN_WALL;
+	break;
 
   case SCAN_STOP:
     if(millis() > timer) {
