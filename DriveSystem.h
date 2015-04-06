@@ -1,3 +1,5 @@
+#include <I2CEncoder.h>
+
 #ifndef DRIVESYSTEM_H
 #define DRIVESYSTEM_H
 

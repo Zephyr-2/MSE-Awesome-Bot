@@ -6,6 +6,7 @@ ArmSystem::ArmSystem()
   targetArm = 0;
   targetClaw = 0;
   targetTower = 0;
+  hasBottle = false;
 }
 
 void ArmSystem::setElevator(int targetElevator)

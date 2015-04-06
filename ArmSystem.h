@@ -76,6 +76,8 @@ public:
 	I2CEncoder encoder_arm;
 	I2CEncoder encoder_claw;
         I2CEncoder encoder_tower;
+        
+        bool hasBottle;
 
 private:
 	int targetElevator;

@@ -20,6 +20,8 @@
 #define AT_TABLE          5
 #define HAS_BOTTLE        6
 #define AT_DOOR           7
+#define DRIVE_TO_TMP      8
+#define GRAB_BOTTLE       9
 
 #define SCAN_DISTANCE            30
 #define SCAN_DISTANCE_THRESHOLD  10
@@ -44,6 +46,7 @@ long timer;
 long drive_timer;
 long last_light, current_light;
 float minTheta = 0;
+float tmp;
 
 int turnDir, nextState;
 
@@ -96,26 +99,21 @@ void loop()
   us_side.read();
   current_light = analogRead(A1);
 
-  float tmp;
-
   switch(state) {
   case SCAN_WALL:
-  
-    if(!arm.towerAtPosition())
+    if(!arm.towerAtPosition() || !arm.towerAtPosition() || !arm.armAtPosition())
       break;
     //put light detection code here
-    if (current_light > last_light && last_light < 80 && us_side.current() < 10)
+    if (current_light > last_light && last_light < 180 && us_side.current() < 10)
     {
-      drive.brake();
-      drive.drive(1700);
-      state = AT_DOOR;
+      turn(RIGHT, TIME_DRIVE_2);
       break; 
     }
-    else if (current_light > last_light && last_light < 80)
+    else if (current_light > last_light && last_light < 180 && !arm.hasBottle)
     {
       drive.brake();
       arm.setTower(90);
-      Serial.println(arm.encoder_tower.getPosition());
+      arm.setClaw(90);
       state = AT_TABLE;
       break;
     }
@@ -192,17 +190,42 @@ void loop()
     break;
 
   case AT_TABLE:
-    if(ir.current() < 65){
-      drive.drive(1700);
-      arm.setArm(20);
-      arm.setClaw(100);
-      if(ir.current() < 50){
-        drive.brake();
-        arm.setArm(100);
-        arm.setClaw(0);
-        state = HAS_BOTTLE;
-      }
+    if(!arm.towerAtPosition() || !arm.clawAtPosition())
+      drive.turn(1500, 0);
+    else
+      drive.turn(1400, 0);
+    
+    if(ir.last() < ir.current() && ir.last() < 50) {
+      tmp = drive.encoder_left.getPosition() + 4;
+      state = DRIVE_TO_TMP;
     }
+    break;
+    
+    case DRIVE_TO_TMP:
+    Serial.println(drive.encoder_left.getPosition());
+    Serial.println(tmp);
+    Serial.println(" ");
+      if(drive.encoder_left.getPosition() > tmp)
+      {
+        arm.setArm(90);
+        state = GRAB_BOTTLE;
+      }
+
+      drive.turn(1650, 0);
+    break;
+    
+    case GRAB_BOTTLE:
+      drive.brake();
+      
+      if(arm.armAtPosition())
+        arm.setClaw(0);
+      
+      if(arm.encoder_claw.getPosition() < 50) {
+        arm.setTower(0);
+        arm.setArm(0);
+        state = SCAN_WALL;
+        arm.hasBottle = true;
+      }
     break;
   }
 
