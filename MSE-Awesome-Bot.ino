@@ -98,17 +98,20 @@ void loop()
   us_side.read();
 
   current_light = analogRead(A1);
-
-  average_light += current_light;
-  average_light = average_light/lightcount; 
   
+  sum_light += current_light;
+  sum_light = sum_light; 
   lightcount++;
-  if(lightcount > 10)
+  
+  if(lightcount > 20)
   {
-  average_light = 0;
+  average_light = sum_light/lightcount;
+  sum_light = 0;
   lightcount = 0;
-  }
+  Serial.println(average_light);
 
+  }
+  
   float tmp;
 
   switch(state) {
@@ -172,7 +175,7 @@ void loop()
 	{
 	   drive.drive(1700);
 	}
-	case = SCAN_WALL;
+	state = SCAN_WALL;
 	break;
 
   case SCAN_STOP:
