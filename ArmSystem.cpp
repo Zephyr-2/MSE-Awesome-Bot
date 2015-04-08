@@ -1,21 +1,26 @@
+/**
+ * Controls the arm motors of the robot, including
+ * the rotating tower, the elevator, the arm motor
+ * and the claw motor.
+ *
+ * Author: Robert Meagher and Jai Sood
+ * Written for MSE2202B 2015
+ */
+
 #include "ArmSystem.h"
 
-ArmSystem::ArmSystem() : pid_elevator(1,0,0)
+ArmSystem::ArmSystem()
 {
 	targetElevator = 0;
 	targetArm = 0;
 	targetClaw = 0;
-
-	encoder_left.zero();
-	encoder_right.zero();
-	encoder_arm.zero();
-	encoder_claw.zero();
+	targetTower = 0;
+	hasBottle = false;
 }
 
 void ArmSystem::setElevator(int targetElevator)
 {
 	this->targetElevator = targetElevator;
-	pid_elevator.reset();
 }
 
 void ArmSystem::setArm(int targetArm)
@@ -26,6 +31,11 @@ void ArmSystem::setArm(int targetArm)
 void ArmSystem::setClaw(int targetClaw)
 {
 	this->targetClaw = targetClaw;
+}
+
+void ArmSystem::setTower(int targetTower)
+{
+	this->targetTower = targetTower;
 }
 
 bool ArmSystem::elevatorAtPosition()
@@ -49,17 +59,63 @@ bool ArmSystem::clawAtPosition()
 	return false;
 }
 
-void update()
+bool ArmSystem::towerAtPosition()
 {
+	if(abs(targetTower - encoder_tower.getPosition()) < TOWER_THRESHOLD)
+		return true;
+	return false;
+}
+
+void ArmSystem::update()
+{
+	// Updates the elevator position
 	float tmp = targetElevator - encoder_left.getPosition();
-	if(abs(tmp) > THRESHOLD) {
-		left_elevator.writeMicroseconds(constrain(MOTOR_BRAKE + tmp * 200));
-		right_elevator.writeMicroseconds(elevator_speed);
+	if(tmp > ELEVATOR_THRESHOLD) {
+		motor_left.writeMicroseconds(ELEVATOR_UP);
+		motor_right.writeMicroseconds(ELEVATOR_UP);
+	}
+	else if(tmp < -ELEVATOR_THRESHOLD) {
+		motor_left.writeMicroseconds(ELEVATOR_DOWN);
+		motor_right.writeMicroseconds(ELEVATOR_DOWN);
 	}
 	else {
-		left_elevator.writeMicroseconds(MOTOR_BRAKE);
-		right_elevator.writeMicroseconds(MOTOR_BRAKE);
+		motor_left.writeMicroseconds(MOTOR_BRAKE);
+		motor_right.writeMicroseconds(MOTOR_BRAKE);
 	}
-
-	int arm_speed = 
+ 	
+	// Updates the arm position
+ 	tmp = targetArm - encoder_arm.getPosition();
+	if(tmp > ARM_THRESHOLD) {
+		arm.writeMicroseconds(ARM_FOREWARD);
+	}
+	else if(tmp < -ARM_THRESHOLD) {
+		arm.writeMicroseconds(ARM_RETRACT);
+	}
+	else {
+		arm.writeMicroseconds(MOTOR_BRAKE);
+	}
+ 	
+	// Updates the claw position
+ 	tmp = targetClaw - encoder_claw.getPosition();
+	if(tmp > CLAW_THRESHOLD) {
+		claw.writeMicroseconds(CLAW_OPEN);
+	}
+	else if(tmp < -CLAW_THRESHOLD) {
+		claw.writeMicroseconds(CLAW_CLOSE);
+	}
+	else {
+		claw.writeMicroseconds(MOTOR_BRAKE);
+	}
+ 	
+	// Updates the tower position
+ 	tmp = targetTower - encoder_tower.getPosition();
+	if(tmp > TOWER_THRESHOLD) {
+		tower.writeMicroseconds(TOWER_RIGHT);
+	}
+	else if(tmp < -TOWER_THRESHOLD) {
+		tower.writeMicroseconds(TOWER_LEFT);
+	}
+	else {
+		tower.writeMicroseconds(MOTOR_BRAKE);
+	}
 }

@@ -1,3 +1,12 @@
+/**
+ * A class which stores a [x,y] coordinate, and manages
+ * common calculations of vectors
+ *
+ * Author: Robert Meagher
+ * Written for Western's SAE Aero Design team
+ * Used in the final project of MSE 2202B 2015
+ */ 
+
 #ifndef _POINT_h
 #define _POINT_h
 
@@ -6,6 +15,13 @@
 class Point
 {
 public:
+	/**
+	 * Initializes a new Point to [0,0] unless
+	 * specified otherwise
+	 *
+	 * @param	x	The x-coordinate. Default 0.
+	 * @param	y	The y-coordinate. Default 0.
+	 */
 	Point(float x = 0, float y = 0) : x(x), y(y) {}
 
 	//boolean EQUALS
@@ -54,7 +70,7 @@ public:
 		return *this;
 	}
 
-	//multiply
+	//multiply by a scalar
 	Point& operator*=(const float& rhs)
 	{
 		x *= rhs;
@@ -64,6 +80,18 @@ public:
 	{
 		x *= rhs;
 		y *= rhs;
+	}
+
+	//divide by a scalar
+	Point& operator/=(const float& rhs)
+	{
+		x /= rhs;
+		y /= rhs;
+	}
+	Point operator/(const float& rhs)
+	{
+		x /= rhs;
+		y /= rhs;
 	}
 
 	//dot product
@@ -78,32 +106,32 @@ public:
 		return x * rhs.y - y * rhs.x;
 	}
 
-	//divide
-	Point& operator/=(const float& rhs)
-	{
-		x /= rhs;
-		y /= rhs;
-		return *this;
-	}
-
-	Point operator/(const float& rhs)
-	{
-		Point tmp = *this;
-		tmp.x /= rhs;
-		tmp.y /= rhs;
-		return tmp;
-	}
-
+	/**
+	 * Returns the magnitude of the point from
+	 * the origin
+	 */
 	float magnitude()
 	{
 		return sqrt(x * x + y * y);
 	}
 
+	/**
+	 * Returns the distance between two points
+	 *
+	 * @param	rhs	The point to calculate distance to
+	 * @return 	The distance between this vector and rhs
+	 */
 	float distance(const Point& rhs)
 	{
 		return sqrt((x - rhs.x)*(x - rhs.x) + (y - rhs.y)*(y - rhs.y));
 	}
 
+	/**
+	 * Returns the tal-to-tail angle between two points, in radians
+	 *
+	 * @param	rhs	The point to calculate the angle from
+	 * @return 	The angle between this vector and rhs
+	 */
 	float theta(const Point& rhs)
 	{
 		return atan2(*this % rhs, *this * rhs);
